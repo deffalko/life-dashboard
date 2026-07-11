@@ -1,0 +1,123 @@
+<div align="center">
+  <img src="https://img.shields.io/badge/React-18-8b5cf6?style=for-the-badge&logo=react" alt="React" />
+  <img src="https://img.shields.io/badge/TypeScript-5.0-3178c6?style=for-the-badge&logo=typescript" alt="TypeScript" />
+  <img src="https://img.shields.io/badge/Redux_Toolkit-1.9-764abc?style=for-the-badge&logo=redux" alt="Redux Toolkit" />
+  <img src="https://img.shields.io/badge/Tailwind_CSS-3.0-06b6d4?style=for-the-badge&logo=tailwindcss" alt="Tailwind CSS" />
+  <img src="https://img.shields.io/badge/Vite-5.0-646cff?style=for-the-badge&logo=vite" alt="Vite" />
+  <img src="https://img.shields.io/badge/React_Router-6.0-ca4245?style=for-the-badge&logo=reactrouter" alt="React Router" />
+</div>
+
+<br/>
+
+<div align="center">
+  <h1>🚀 Life Dashboard</h1>
+  <p><strong>Full-featured SPA dashboard with tasks, notes, weather & more</strong></p>
+  <p>Полнофункциональное SPA-приложение для управления задачами, заметками и погодой</p>
+  
+  <br/>
+  
+  <a href="https://github.com/deffalko/life-dashboard">
+    <img src="https://img.shields.io/github/stars/deffalko/life-dashboard?style=social" alt="Stars" />
+  </a>
+  <a href="https://github.com/deffalko/life-dashboard/issues">
+    <img src="https://img.shields.io/github/issues/deffalko/life-dashboard" alt="Issues" />
+  </a>
+  <a href="https://github.com/deffalko/life-dashboard/blob/main/LICENSE">
+    <img src="https://img.shields.io/github/license/deffalko/life-dashboard" alt="License" />
+  </a>
+  
+  <br/>
+  
+  <h3>
+    <a href="https://life-dashboard-i4n4.vercel.app/">🌐 Посмотреть демо</a>
+  </h3>
+</div>
+
+---
+
+## 📸 **Скриншоты**
+
+<div align="center">
+  <img src="https://via.placeholder.com/800x450/8b5cf6/ffffff?text=Dashboard+Preview" alt="Dashboard Preview" width="80%" />
+  <br/>
+  <img src="https://via.placeholder.com/800x450/7c3aed/ffffff?text=Tasks+Management" alt="Tasks Management" width="80%" />
+  <br/>
+  <img src="https://via.placeholder.com/800x450/6d28d9/ffffff?text=Notes+&+Weather" alt="Notes & Weather" width="80%" />
+</div>
+
+> 💡 _Скриншоты будут добавлены позже. Вы можете заменить плейсхолдеры на реальные изображения!_
+
+---
+
+## ✨ **Features | Функционал**
+
+### 📋 **Task Management | Управление задачами**
+
+- ✅ Создание, редактирование и удаление задач
+- 📂 Категории: Работа, Личное, Учеба
+- 🔴 Приоритеты: Высокий, Средний, Низкий
+- 📅 Дедлайны с подсветкой просроченных задач
+- 🔍 Фильтрация по статусу, категории и поиску
+- 📊 Статистика выполнения
+- 💾 Автосохранение в LocalStorage
+
+### 📝 **Notes | Заметки**
+
+- ✏️ Создание и редактирование заметок
+- 🏷️ Теги для группировки
+- 🎨 Выбор цвета заметки
+- 📌 Закрепление важных заметок
+- 📝 Поддержка Markdown
+- 🔍 Поиск по заметкам
+
+### 🌤️ **Weather | Погода**
+
+- 🌡️ Текущая погода по городу
+- 📅 Прогноз на 5 дней
+- ❤️ Избранные города
+- 🌍 Автоопределение геолокации
+- 🔄 Обновление данных в реальном времени
+
+### ⚙️ **Settings | Настройки**
+
+- 🌗 Тёмная/светлая тема
+- 🌍 Переключение языка (RU/EN)
+- 📦 Экспорт/импорт данных
+- 🗑️ Очистка всех данных
+
+---
+
+## 🛠️ **Tech Stack | Технологии**
+
+| Технология                                      | Назначение            |
+| ----------------------------------------------- | --------------------- |
+| [React 18](https://reactjs.org/)                | UI библиотека         |
+| [TypeScript](https://www.typescriptlang.org/)   | Типизация             |
+| [Redux Toolkit](https://redux-toolkit.js.org/)  | Управление состоянием |
+| [React Router v6](https://reactrouter.com/)     | Маршрутизация         |
+| [Tailwind CSS](https://tailwindcss.com/)        | Стилизация            |
+| [Framer Motion](https://www.framer.com/motion/) | Анимации              |
+| [Axios](https://axios-http.com/)                | HTTP запросы          |
+| [React Hot Toast](https://react-hot-toast.com/) | Уведомления           |
+| [Heroicons](https://heroicons.com/)             | Иконки                |
+| [Vite](https://vitejs.dev/)                     | Сборка                |
+
+---
+
+## 🚀 **Quick Start | Быстрый старт**
+
+### 📦 **Установка и запуск**
+
+```bash
+# Клонируйте репозиторий
+git clone https://github.com/deffalko/life-dashboard.git
+
+# Перейдите в папку проекта
+cd life-dashboard
+
+# Установите зависимости
+npm install
+
+# Запустите в режиме разработки
+npm run dev
+```
