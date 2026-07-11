@@ -1,0 +1,2 @@
+# Создайте пустой файл .nojekyll
+New-Item -Path public\.nojekyll -ItemType File
