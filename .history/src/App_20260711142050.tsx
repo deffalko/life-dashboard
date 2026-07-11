@@ -4,7 +4,6 @@ import { useSelector, useDispatch } from "react-redux";
 import { RootState } from "./store";
 import { toggleTheme } from "./store/slices/themeSlice";
 import { toggleLanguage } from "./store/slices/languageSlice";
-import { useTranslation } from "./hooks/useTranslation";
 import Dashboard from "./pages/Dashboard";
 import TasksPage from "./pages/TasksPage";
 import NotesPage from "./pages/NotesPage";
@@ -24,7 +23,6 @@ import {
 const App: React.FC = () => {
   const dispatch = useDispatch();
   const location = useLocation();
-  const { translate } = useTranslation();
   const { darkMode } = useSelector((state: RootState) => state.theme);
   const { currentLanguage } = useSelector((state: RootState) => state.language);
 
@@ -46,6 +44,7 @@ const App: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-indigo-50 dark:from-gray-900 dark:via-purple-950 dark:to-gray-900 transition-colors duration-300">
+      {/* Навигация */}
       <nav className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-lg shadow-lg sticky top-0 z-50 border-b border-purple-100 dark:border-purple-900/50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
@@ -67,9 +66,7 @@ const App: React.FC = () => {
                       }`}
                     >
                       <item.icon className="h-5 w-5" />
-                      <span className="hidden lg:inline">
-                        {translate(item.label as any)}
-                      </span>
+                      <span className="hidden lg:inline">{item.label}</span>
                     </Link>
                   );
                 })}
@@ -100,6 +97,7 @@ const App: React.FC = () => {
         </div>
       </nav>
 
+      {/* Мобильная навигация */}
       <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white/80 dark:bg-gray-900/80 backdrop-blur-lg border-t border-purple-100 dark:border-purple-900/50 z-50">
         <div className="flex justify-around py-2">
           {navItems.map((item) => {
@@ -115,15 +113,14 @@ const App: React.FC = () => {
                 }`}
               >
                 <item.icon className="h-6 w-6" />
-                <span className="text-xs mt-1">
-                  {translate(item.label as any)}
-                </span>
+                <span className="text-xs mt-1">{item.label}</span>
               </Link>
             );
           })}
         </div>
       </div>
 
+      {/* Контент */}
       <div className="pb-20 md:pb-0">
         <Routes>
           <Route path="/" element={<Dashboard />} />

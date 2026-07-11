@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { RootState } from "../store";
 import {
@@ -15,23 +15,14 @@ import {
   MapPinIcon,
 } from "@heroicons/react/24/outline";
 
-// Кеш для погоды (чтобы не грузить повторно)
-const weatherCache = new Map();
-
-// Мок-данные для мгновенного отображения
+// Мок-данные для автономной работы
 const mockWeatherData = (city: string) => ({
   city: city || "Москва",
-  temperature: Math.round(15 + Math.random() * 15), // Случайная температура для реализма
-  feelsLike: Math.round(12 + Math.random() * 15),
-  humidity: 40 + Math.round(Math.random() * 40),
-  windSpeed: 5 + Math.round(Math.random() * 20),
-  description: [
-    "Ясно",
-    "Облачно",
-    "Небольшой дождь",
-    "Солнечно",
-    "Переменная облачность",
-  ][Math.floor(Math.random() * 5)],
+  temperature: 22,
+  feelsLike: 20,
+  humidity: 65,
+  windSpeed: 12,
+  description: "Облачно с прояснениями",
   icon: "https://openweathermap.org/img/wn/04d@2x.png",
   forecast: [
     {
@@ -73,55 +64,44 @@ const WeatherPage: React.FC = () => {
     (state: RootState) => state.weather,
   );
   const [searchCity, setSearchCity] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  const isFirstLoad = useRef(true);
 
-  const fetchWeather = async (cityName: string, showDemo: boolean = true) => {
+  const fetchWeather = async (cityName: string) => {
     const apiKey = import.meta.env.VITE_WEATHER_API_KEY;
 
-    // Проверяем кеш
-    const cacheKey = cityName.toLowerCase();
-    if (weatherCache.has(cacheKey)) {
-      const cached = weatherCache.get(cacheKey);
-      // Если кеш свежий (менее 5 минут)
-      if (Date.now() - cached.timestamp < 300000) {
-        console.log("📦 Используем кеш для", cityName);
-        dispatch(setWeather(cached.data));
-        return;
-      }
+    if (!apiKey) {
+      dispatch(setWeather(mockWeatherData(cityName)));
+      toast.success("Используются демо-данные (нет API ключа)", { icon: "🌤️" });
+      return;
     }
-
-    // Сразу показываем демо-данные (чтобы не было пустого экрана)
-    if (showDemo && !current) {
-      const demo = mockWeatherData(cityName);
-      dispatch(setWeather({ ...demo, city: cityName }));
-    }
-
-    setIsLoading(true);
 
     try {
-      console.log(`🌤️ Запрос погоды для: ${cityName}`);
+      dispatch(setLoading(true));
 
+      // Прямой запрос (без прокси)
       const baseUrl = "https://api.openweathermap.org/data/2.5";
 
-      // Запрос с коротким таймаутом
+      console.log(`Запрос погоды для города: ${cityName}`);
+
+      // 1. Текущая погода
       const response = await axios.get(
         `${baseUrl}/weather?q=${cityName}&appid=${apiKey}&units=metric&lang=ru`,
-        { timeout: 5000 }, // 5 секунд
+        { timeout: 10000 },
       );
 
       const data = response.data;
-      console.log("✅ Погода получена:", data.name);
+      console.log("Погода получена:", data);
 
-      // Прогноз (с отдельным таймаутом)
+      // 2. Прогноз на 5 дней
       let forecastData = [];
       try {
         const forecastResponse = await axios.get(
           `${baseUrl}/forecast?q=${cityName}&appid=${apiKey}&units=metric&lang=ru&cnt=5`,
-          { timeout: 5000 },
+          { timeout: 10000 },
         );
+        console.log("Прогноз получен:", forecastResponse.data);
 
-        if (forecastResponse.data?.list) {
+        // Проверяем, есть ли список прогнозов
+        if (forecastResponse.data && forecastResponse.data.list) {
           forecastData = forecastResponse.data.list.map((item: any) => ({
             date: item.dt_txt || new Date().toISOString(),
             temperature: Math.round(item.main?.temp || 0),
@@ -130,10 +110,15 @@ const WeatherPage: React.FC = () => {
           }));
         }
       } catch (forecastError) {
-        console.warn("⚠️ Прогноз не загружен, используем мок");
+        console.warn(
+          "Не удалось получить прогноз, используем мок:",
+          forecastError,
+        );
+        // Если прогноз не загрузился, используем мок
         forecastData = mockWeatherData(cityName).forecast;
       }
 
+      // Формируем данные
       const weatherData = {
         city: data.name || cityName,
         temperature: Math.round(data.main?.temp || 0),
@@ -148,36 +133,39 @@ const WeatherPage: React.FC = () => {
             : mockWeatherData(cityName).forecast,
       };
 
-      // Сохраняем в кеш
-      weatherCache.set(cacheKey, {
-        data: weatherData,
-        timestamp: Date.now(),
-      });
-
+      console.log("Финальные данные погоды:", weatherData);
       dispatch(setWeather(weatherData));
-      toast.success(`🌤️ ${weatherData.city}: ${weatherData.temperature}°C`);
+      toast.success(`Погода для ${weatherData.city} загружена! 🌤️`);
     } catch (error: any) {
-      console.error("❌ Ошибка:", error.message);
+      console.error("Ошибка загрузки погоды:", error);
 
-      // Если ошибка, но у нас уже есть демо-данные - оставляем их
-      if (!current || current.city !== cityName) {
-        const demo = mockWeatherData(cityName);
-        dispatch(setWeather({ ...demo, city: cityName }));
+      // Проверяем, есть ли ответ от сервера
+      if (error.response) {
+        console.log("Ответ сервера:", error.response.data);
+        if (error.response.status === 401) {
+          toast.error("Неверный API ключ");
+        } else if (error.response.status === 404) {
+          toast.error(`Город "${cityName}" не найден`);
+        } else {
+          toast.error(
+            `Ошибка: ${error.response.data?.message || "Неизвестная ошибка"}`,
+          );
+        }
+      } else if (error.request) {
+        toast.error("Нет ответа от сервера. Проверьте интернет.");
+      } else {
+        toast.error("Ошибка запроса");
       }
 
-      // Показываем сообщение только если это не таймаут
-      if (error.code !== "ECONNABORTED") {
-        toast.error(`⚠️ ${cityName}: данные не загружены, показываем демо`);
-      }
-    } finally {
-      setIsLoading(false);
+      // Показываем демо-данные
+      dispatch(setWeather(mockWeatherData(cityName)));
     }
   };
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchCity.trim()) {
-      fetchWeather(searchCity.trim(), true);
+      fetchWeather(searchCity.trim());
       setSearchCity("");
     }
   };
@@ -193,25 +181,14 @@ const WeatherPage: React.FC = () => {
     }
   };
 
-  // Загрузка при старте (сразу показываем демо)
+  // Загрузка при старте
   useEffect(() => {
     if (!current && !error) {
-      // Сразу показываем демо-данные для Москвы
-      const demo = mockWeatherData("Москва");
-      dispatch(setWeather(demo));
-
-      // А в фоне пытаемся загрузить реальные данные
-      if (isFirstLoad.current) {
-        isFirstLoad.current = false;
-        setTimeout(() => {
-          fetchWeather("Moscow", false);
-        }, 500);
-      }
+      fetchWeather("Moscow");
     }
   }, []);
 
-  // Показываем индикатор загрузки только при первом запуске
-  if (loading && !current) {
+  if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="animate-spin rounded-full h-16 w-16 border-4 border-purple-500 border-t-transparent"></div>
@@ -243,11 +220,10 @@ const WeatherPage: React.FC = () => {
               />
               <button
                 type="submit"
-                disabled={isLoading}
-                className="px-6 py-3 bg-gradient-to-r from-purple-500 to-indigo-500 text-white font-semibold rounded-xl hover:from-purple-600 hover:to-indigo-600 transition shadow-lg flex items-center gap-2 disabled:opacity-50"
+                className="px-6 py-3 bg-gradient-to-r from-purple-500 to-indigo-500 text-white font-semibold rounded-xl hover:from-purple-600 hover:to-indigo-600 transition shadow-lg flex items-center gap-2"
               >
                 <MagnifyingGlassIcon className="h-5 w-5" />
-                {isLoading ? "Загрузка..." : "Найти"}
+                Найти
               </button>
             </form>
 
@@ -263,11 +239,6 @@ const WeatherPage: React.FC = () => {
                       className={`h-6 w-6 ${favorites.includes(current.city) ? "text-red-500 fill-current" : "text-gray-400"}`}
                     />
                   </button>
-                  {isLoading && (
-                    <span className="text-sm text-gray-400 animate-pulse">
-                      ⏳
-                    </span>
-                  )}
                 </h2>
                 <p className="text-6xl font-bold text-purple-600 dark:text-purple-400 mt-2">
                   {current.temperature}°C
@@ -280,9 +251,6 @@ const WeatherPage: React.FC = () => {
                   <span>💧 Влажность: {current.humidity}%</span>
                   <span>💨 Ветер: {current.windSpeed} км/ч</span>
                 </div>
-                {!current.icon.includes("openweathermap") && (
-                  <p className="text-xs text-gray-400 mt-2">⚠️ Демо-данные</p>
-                )}
               </div>
               <img
                 src={current.icon}
@@ -309,7 +277,7 @@ const WeatherPage: React.FC = () => {
                 {favorites.map((city) => (
                   <button
                     key={city}
-                    onClick={() => fetchWeather(city, true)}
+                    onClick={() => fetchWeather(city)}
                     className="w-full text-left px-4 py-3 rounded-xl hover:bg-purple-50 dark:hover:bg-purple-900/30 transition flex items-center justify-between"
                   >
                     <span className="text-gray-700 dark:text-gray-300">

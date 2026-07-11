@@ -1,192 +1,194 @@
-import React from "react";
-import { useSelector, useDispatch } from "react-redux";
+import React, { useEffect, useState } from "react";
+import { useSelector } from "react-redux";
 import { RootState } from "../store";
-import { setTheme } from "../store/slices/themeSlice";
-import { setLanguage } from "../store/slices/languageSlice";
+import { useTranslation } from "../hooks/useTranslation";
 import { motion } from "framer-motion";
-import toast from "react-hot-toast";
+import {
+  CheckCircleIcon,
+  ClockIcon,
+  ExclamationCircleIcon,
+  ArrowTrendingUpIcon,
+} from "@heroicons/react/24/outline";
 
-const SettingsPage: React.FC = () => {
-  const dispatch = useDispatch();
-  const { darkMode } = useSelector((state: RootState) => state.theme);
-  const { currentLanguage } = useSelector((state: RootState) => state.language);
+const Dashboard: React.FC = () => {
+  const { translate } = useTranslation();
+  const tasks = useSelector((state: RootState) => state.tasks.items);
+  const [greeting, setGreeting] = useState("");
+  const [time, setTime] = useState("");
+  const [date, setDate] = useState("");
 
-  const handleExport = () => {
-    const data = {
-      tasks: JSON.parse(localStorage.getItem("tasks") || "[]"),
-      notes: JSON.parse(localStorage.getItem("notes") || "[]"),
-      favorites: JSON.parse(localStorage.getItem("weatherFavorites") || "[]"),
-      exportDate: new Date().toISOString(),
+  useEffect(() => {
+    const hour = new Date().getHours();
+    if (hour < 12) setGreeting(translate("Доброе утро 🌅"));
+    else if (hour < 18) setGreeting(translate("Добрый день 🌤️"));
+    else setGreeting(translate("Добрый вечер 🌙"));
+
+    const updateTime = () => {
+      const now = new Date();
+      setTime(
+        now.toLocaleTimeString("ru-RU", {
+          hour: "2-digit",
+          minute: "2-digit",
+          second: "2-digit",
+        }),
+      );
+      setDate(
+        now.toLocaleDateString("ru-RU", {
+          day: "numeric",
+          month: "long",
+          year: "numeric",
+        }),
+      );
     };
-    const blob = new Blob([JSON.stringify(data, null, 2)], {
-      type: "application/json",
-    });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `life-dashboard-backup-${new Date().toISOString().split("T")[0]}.json`;
-    a.click();
-    URL.revokeObjectURL(url);
-    toast.success("Данные экспортированы! 📦");
-  };
 
-  const handleImport = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      try {
-        const data = JSON.parse(e.target?.result as string);
-        if (data.tasks)
-          localStorage.setItem("tasks", JSON.stringify(data.tasks));
-        if (data.notes)
-          localStorage.setItem("notes", JSON.stringify(data.notes));
-        if (data.favorites)
-          localStorage.setItem(
-            "weatherFavorites",
-            JSON.stringify(data.favorites),
-          );
-        toast.success("Данные импортированы! 🔄");
-        setTimeout(() => window.location.reload(), 1000);
-      } catch {
-        toast.error("Ошибка при импорте");
-      }
-    };
-    reader.readAsText(file);
-    event.target.value = "";
-  };
+    updateTime();
+    const interval = setInterval(updateTime, 1000);
+    return () => clearInterval(interval);
+  }, [translate]);
 
-  const handleClearData = () => {
-    if (confirm("Вы уверены, что хотите удалить все данные?")) {
-      localStorage.clear();
-      toast.success("Все данные удалены");
-      setTimeout(() => window.location.reload(), 1000);
-    }
-  };
+  const total = tasks.length;
+  const completed = tasks.filter((t) => t.completed).length;
+  const active = total - completed;
+  const overdue = tasks.filter(
+    (t) => !t.completed && t.deadline && new Date(t.deadline) < new Date(),
+  ).length;
+  const completionRate = total > 0 ? Math.round((completed / total) * 100) : 0;
+
+  const stats = [
+    {
+      label: translate("Всего задач"),
+      value: total,
+      icon: ClockIcon,
+      color: "from-purple-500 to-indigo-500",
+    },
+    {
+      label: translate("Выполнено"),
+      value: completed,
+      icon: CheckCircleIcon,
+      color: "from-green-500 to-emerald-500",
+    },
+    {
+      label: translate("В процессе"),
+      value: active,
+      icon: ArrowTrendingUpIcon,
+      color: "from-blue-500 to-cyan-500",
+    },
+    {
+      label: translate("Просрочено"),
+      value: overdue,
+      icon: ExclamationCircleIcon,
+      color: "from-red-500 to-pink-500",
+    },
+  ];
+
+  const recentTasks = tasks.slice(0, 5);
 
   return (
-    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      {/* Приветствие */}
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
+        initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="bg-white dark:bg-gray-800/50 backdrop-blur-sm rounded-3xl shadow-xl p-6 border border-purple-100 dark:border-purple-900/30"
+        className="bg-white dark:bg-gray-800/50 backdrop-blur-sm rounded-3xl shadow-xl p-6 sm:p-8 mb-6 border border-purple-100 dark:border-purple-900/30"
       >
-        <h1 className="text-3xl font-bold text-gray-800 dark:text-white mb-6">
-          ⚙️ Настройки
-        </h1>
-
-        <div className="space-y-6">
-          {/* Тема */}
-          <div className="flex items-center justify-between p-4 bg-purple-50 dark:bg-purple-900/20 rounded-2xl">
-            <div>
-              <h3 className="font-semibold text-gray-800 dark:text-white">
-                Тема оформления
-              </h3>
-              <p className="text-sm text-gray-500 dark:text-gray-400">
-                Выберите светлую или тёмную тему
-              </p>
-            </div>
-            <div className="flex gap-2">
-              <button
-                onClick={() => dispatch(setTheme(false))}
-                className={`px-4 py-2 rounded-xl transition ${
-                  !darkMode
-                    ? "bg-purple-500 text-white"
-                    : "bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300"
-                }`}
-              >
-                ☀️ Светлая
-              </button>
-              <button
-                onClick={() => dispatch(setTheme(true))}
-                className={`px-4 py-2 rounded-xl transition ${
-                  darkMode
-                    ? "bg-purple-500 text-white"
-                    : "bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300"
-                }`}
-              >
-                🌙 Тёмная
-              </button>
-            </div>
-          </div>
-
-          {/* Язык */}
-          <div className="flex items-center justify-between p-4 bg-purple-50 dark:bg-purple-900/20 rounded-2xl">
-            <div>
-              <h3 className="font-semibold text-gray-800 dark:text-white">
-                Язык интерфейса
-              </h3>
-              <p className="text-sm text-gray-500 dark:text-gray-400">
-                Выберите язык приложения
-              </p>
-            </div>
-            <div className="flex gap-2">
-              <button
-                onClick={() => dispatch(setLanguage("ru"))}
-                className={`px-4 py-2 rounded-xl transition ${
-                  currentLanguage === "ru"
-                    ? "bg-purple-500 text-white"
-                    : "bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300"
-                }`}
-              >
-                🇷🇺 Русский
-              </button>
-              <button
-                onClick={() => dispatch(setLanguage("en"))}
-                className={`px-4 py-2 rounded-xl transition ${
-                  currentLanguage === "en"
-                    ? "bg-purple-500 text-white"
-                    : "bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300"
-                }`}
-              >
-                🇬🇧 English
-              </button>
-            </div>
-          </div>
-
-          {/* Данные */}
-          <div className="p-4 bg-purple-50 dark:bg-purple-900/20 rounded-2xl">
-            <h3 className="font-semibold text-gray-800 dark:text-white mb-3">
-              Управление данными
-            </h3>
-            <div className="flex flex-wrap gap-3">
-              <button
-                onClick={handleExport}
-                className="px-4 py-2 bg-gradient-to-r from-green-500 to-emerald-500 text-white font-semibold rounded-xl hover:from-green-600 hover:to-emerald-600 transition shadow-lg"
-              >
-                📤 Экспорт данных
-              </button>
-              <label className="px-4 py-2 bg-gradient-to-r from-blue-500 to-cyan-500 text-white font-semibold rounded-xl hover:from-blue-600 hover:to-cyan-600 transition shadow-lg cursor-pointer">
-                📥 Импорт данных
-                <input
-                  type="file"
-                  accept=".json"
-                  onChange={handleImport}
-                  className="hidden"
-                />
-              </label>
-              <button
-                onClick={handleClearData}
-                className="px-4 py-2 bg-red-500 text-white font-semibold rounded-xl hover:bg-red-600 transition shadow-lg"
-              >
-                🗑️ Очистить всё
-              </button>
-            </div>
-          </div>
-
-          {/* О приложении */}
-          <div className="p-4 bg-purple-50 dark:bg-purple-900/20 rounded-2xl text-center">
-            <p className="text-sm text-gray-500 dark:text-gray-400">
-              Life Dashboard v1.0.0 • Сделано с 💜
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <div>
+            <h1 className="text-3xl sm:text-4xl font-bold text-gray-800 dark:text-white">
+              {greeting}
+            </h1>
+            <p className="text-lg text-gray-600 dark:text-gray-300 mt-1">
+              {date}
             </p>
-            <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
-              Данные хранятся локально в вашем браузере
+          </div>
+          <div className="text-right">
+            <p className="text-4xl sm:text-5xl font-light text-purple-600 dark:text-purple-400 font-mono">
+              {time}
+            </p>
+            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+              {completionRate}% {translate("задач выполнено")}
             </p>
           </div>
         </div>
+      </motion.div>
+
+      {/* Статистика */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+        {stats.map((stat, index) => (
+          <motion.div
+            key={index}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: index * 0.1 }}
+            className="bg-white dark:bg-gray-800/50 backdrop-blur-sm rounded-2xl shadow-lg p-4 sm:p-6 border border-purple-100 dark:border-purple-900/30 hover:shadow-xl transition"
+          >
+            <div
+              className={`bg-gradient-to-r ${stat.color} rounded-2xl p-3 sm:p-4 text-white`}
+            >
+              <div className="flex items-center justify-between">
+                <stat.icon className="h-6 w-6 sm:h-8 sm:w-8" />
+                <span className="text-2xl sm:text-4xl font-bold">
+                  {stat.value}
+                </span>
+              </div>
+              <p className="text-xs sm:text-sm opacity-90 mt-1">{stat.label}</p>
+            </div>
+          </motion.div>
+        ))}
+      </div>
+
+      {/* Последние задачи */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.4 }}
+        className="bg-white dark:bg-gray-800/50 backdrop-blur-sm rounded-3xl shadow-xl p-6 border border-purple-100 dark:border-purple-900/30"
+      >
+        <h2 className="text-xl font-bold text-gray-800 dark:text-white mb-4 flex items-center gap-2">
+          <ClockIcon className="h-6 w-6 text-purple-500" />
+          {translate("Последние задачи")}
+        </h2>
+        {recentTasks.length === 0 ? (
+          <p className="text-gray-400 dark:text-gray-500 text-center py-8">
+            ✨ {translate("Нет задач. Добавьте первую!")}
+          </p>
+        ) : (
+          <div className="space-y-2">
+            {recentTasks.map((task, index) => (
+              <motion.div
+                key={task.id}
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: index * 0.05 }}
+                className={`flex items-center justify-between p-3 rounded-xl ${
+                  task.completed
+                    ? "bg-gray-50 dark:bg-gray-700/50 line-through text-gray-400 dark:text-gray-500"
+                    : "bg-purple-50 dark:bg-purple-900/20"
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  <span
+                    className={`w-2 h-2 rounded-full ${
+                      task.priority === "high"
+                        ? "bg-red-500"
+                        : task.priority === "medium"
+                          ? "bg-yellow-500"
+                          : "bg-green-500"
+                    }`}
+                  />
+                  <span className={task.completed ? "line-through" : ""}>
+                    {task.title}
+                  </span>
+                </div>
+                <span className="text-xs px-2 py-1 rounded-full bg-white dark:bg-gray-700 text-gray-600 dark:text-gray-300">
+                  {task.category}
+                </span>
+              </motion.div>
+            ))}
+          </div>
+        )}
       </motion.div>
     </div>
   );
 };
 
-export default SettingsPage;
+export default Dashboard;

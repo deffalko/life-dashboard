@@ -1,9 +1,9 @@
 import { configureStore } from "@reduxjs/toolkit";
 import tasksReducer from "./slices/tasksSlice";
-import notesReducer from "./slices/notesSlice";
-import weatherReducer from "./slices/weatherSlice";
-import themeReducer from "./slices/themeSlice";
-import languageReducer from "./slices/languageSlice";
+import notesReducer from "./slices/notesSlice.ts";
+import weatherReducer from "./slices/weatherSlice.ts";
+import themeReducer from "./slices/themeSlice.ts";
+import languageReducer from "./slices/languageSlice.ts";
 
 export const store = configureStore({
   reducer: {

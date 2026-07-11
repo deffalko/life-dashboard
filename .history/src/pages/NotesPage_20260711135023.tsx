@@ -195,7 +195,7 @@ const NotesPage: React.FC = () => {
                     {note.title}
                   </h3>
                   <div className="flex gap-1">
-                    {/* <button
+                    <button
                       onClick={() => dispatch(togglePin(note.id))}
                       className={`p-1 rounded-lg transition ${
                         note.pinned
@@ -206,29 +206,6 @@ const NotesPage: React.FC = () => {
                       <PinIcon
                         className={`h-5 w-5 ${note.pinned ? "fill-current" : ""}`}
                       />
-                    </button> */}
-                    <button
-                      onClick={() => dispatch(togglePin(note.id))}
-                      className={`p-1 rounded-lg transition ${
-                        note.pinned
-                          ? "text-purple-500"
-                          : "text-gray-400 hover:text-purple-500"
-                      }`}
-                    >
-                      {/* Вместо PinIcon используем простой SVG */}
-                      <svg
-                        className={`h-5 w-5 ${note.pinned ? "fill-current" : ""}`}
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"
-                        />
-                      </svg>
                     </button>
                     <button
                       onClick={() => {
