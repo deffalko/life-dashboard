@@ -1,0 +1,21 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Life Dashboard</title>
+    <script>
+      // Получаем текущий путь
+      const path = window.location.pathname;
+      console.log("Redirecting from:", path);
+
+      // Сохраняем путь для React Router
+      sessionStorage.setItem("redirectPath", path);
+
+      // Перенаправляем на главную
+      window.location.replace("/life-dashboard/");
+    </script>
+  </head>
+  <body>
+    <p>Перенаправление...</p>
+  </body>
+</html>

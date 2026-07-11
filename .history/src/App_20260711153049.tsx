@@ -1,5 +1,11 @@
 import React, { useEffect } from "react";
-import { Routes, Route, Link, useLocation } from "react-router-dom";
+import {
+  Routes,
+  Route,
+  Link,
+  useLocation,
+  useNavigate,
+} from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { RootState } from "./store";
 import { toggleTheme } from "./store/slices/themeSlice";
@@ -24,9 +30,29 @@ import {
 const App: React.FC = () => {
   const dispatch = useDispatch();
   const location = useLocation();
+  const navigate = useNavigate();
   const { translate } = useTranslation();
   const { darkMode } = useSelector((state: RootState) => state.theme);
   const { currentLanguage } = useSelector((state: RootState) => state.language);
+
+  // Обработка перенаправления после 404
+  useEffect(() => {
+    const redirectPath = sessionStorage.getItem("redirectPath");
+    if (
+      redirectPath &&
+      redirectPath !== "/" &&
+      redirectPath !== "/life-dashboard/"
+    ) {
+      // Очищаем сохранённый путь
+      sessionStorage.removeItem("redirectPath");
+
+      // Если путь не пустой, перенаправляем на него
+      const cleanPath = redirectPath.replace("/life-dashboard", "") || "/";
+      if (cleanPath !== location.pathname) {
+        navigate(cleanPath, { replace: true });
+      }
+    }
+  }, [navigate, location.pathname]);
 
   useEffect(() => {
     if (darkMode) {
