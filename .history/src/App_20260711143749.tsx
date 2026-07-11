@@ -44,9 +44,6 @@ const App: React.FC = () => {
     { path: "/settings", icon: Cog6ToothIcon, label: "Настройки" },
   ];
 
-  // Текст для кнопки переключения языка
-  const languageLabel = currentLanguage === "ru" ? "EN" : "RU";
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-indigo-50 dark:from-gray-900 dark:via-purple-950 dark:to-gray-900 transition-colors duration-300">
       <nav className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-lg shadow-lg sticky top-0 z-50 border-b border-purple-100 dark:border-purple-900/50">
@@ -54,7 +51,7 @@ const App: React.FC = () => {
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center gap-8">
               <h1 className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent">
-                Life Dashboard
+                Life Dashboardв
               </h1>
               <div className="hidden md:flex gap-2">
                 {navItems.map((item) => {
@@ -84,8 +81,8 @@ const App: React.FC = () => {
                 className="flex items-center gap-1 px-3 py-2 rounded-xl hover:bg-purple-50 dark:hover:bg-purple-900/30 transition text-gray-600 dark:text-gray-300"
               >
                 <GlobeAltIcon className="h-5 w-5" />
-                <span className="text-sm font-medium bg-purple-100 dark:bg-purple-900/50 px-2 py-0.5 rounded-lg">
-                  {languageLabel}
+                <span className="text-sm font-medium">
+                  {currentLanguage.toUpperCase()}
                 </span>
               </button>
               <button
