@@ -1,22 +1,17 @@
 <!doctype html>
-<html>
+<html lang="ru">
   <head>
-    <meta charset="utf-8" />
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <base href="/life-dashboard/" />
     <title>Life Dashboard</title>
-    <script type="text/javascript">
-      // Перенаправляем на index.html с сохранением пути
-      const pathSegments = location.pathname.split("/");
-      const repoName = pathSegments[1] || "life-dashboard";
-      const restPath = pathSegments.slice(2).join("/");
-
-      // Сохраняем путь для React Router
-      sessionStorage.setItem("redirectPath", "/" + restPath);
-
-      // Перенаправляем на главную
-      window.location.href = "/" + repoName + "/";
-    </script>
+    <script type="module" crossorigin src="/life-dashboard/assets/index-D60GIhTe.js"></script>
+    <link rel="modulepreload" crossorigin href="/life-dashboard/assets/redux-BIEbOspt.js">
+    <link rel="modulepreload" crossorigin href="/life-dashboard/assets/router-CqrUZzyh.js">
+    <link rel="stylesheet" crossorigin href="/life-dashboard/assets/index-BWsZ9A-8.css">
   </head>
   <body>
-    <p>Перенаправление...</p>
+    <div id="root"></div>
   </body>
 </html>
